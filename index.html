@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Z-ANUS</title>
+<!--
+	Экран загрузки Z-ANUS (Garry's Mod) - чёрная тема, квадратный снег.
+	server.cfg:  sv_loadingurl "http://адрес/index.html"
+	Файл полностью самодостаточный: без шрифтов, картинок и скриптов из интернета -
+	если открылся сам файл, открылось всё. Написан под старый браузер GMod (Awesomium)
+	и под новый (Chromium, ветка x86-64).
+-->
+<style>
+	* { margin: 0; padding: 0; box-sizing: border-box; }
+	html, body { width: 100%; height: 100%; overflow: hidden; }
+	body {
+		background: #000;
+		font-family: "Bahnschrift", "Segoe UI", Arial, sans-serif;
+		color: #f0f0f0; text-align: center;
+		-webkit-user-select: none; user-select: none; cursor: default;
+	}
+
+	/* медленно плывущие пятна: холодный свет, тень, красный акцент */
+	.blob { position: absolute; border-radius: 50%; }
+	#b1 { width: 90vw; height: 90vw; left: -30vw; top: -50vw;
+		background: radial-gradient(circle, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0) 60%);
+		-webkit-animation: d1 9s ease-in-out infinite alternate; animation: d1 9s ease-in-out infinite alternate; }
+	#b2 { width: 80vw; height: 80vw; right: -30vw; bottom: -45vw;
+		background: radial-gradient(circle, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 60%);
+		-webkit-animation: d2 11s ease-in-out infinite alternate; animation: d2 11s ease-in-out infinite alternate; }
+	#b3 { width: 60vw; height: 60vw; left: 30vw; top: 10vh;
+		background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 60%);
+		-webkit-animation: d3 7s ease-in-out infinite alternate; animation: d3 7s ease-in-out infinite alternate; }
+	@-webkit-keyframes d1 { from { -webkit-transform: translate(0,0); } to { -webkit-transform: translate(35vw,25vw); } }
+	@keyframes d1 { from { transform: translate(0,0); } to { transform: translate(35vw,25vw); } }
+	@-webkit-keyframes d2 { from { -webkit-transform: translate(0,0); } to { -webkit-transform: translate(-40vw,-20vw); } }
+	@keyframes d2 { from { transform: translate(0,0); } to { transform: translate(-40vw,-20vw); } }
+	@-webkit-keyframes d3 { from { -webkit-transform: translate(-20vw,0); } to { -webkit-transform: translate(15vw,-10vh); } }
+	@keyframes d3 { from { transform: translate(-20vw,0); } to { transform: translate(15vw,-10vh); } }
+
+	/* тонкие полосы */
+	#lines { position: absolute; left: 0; right: 0; top: -8px; bottom: 0;
+		background: repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0px, rgba(0,0,0,0.16) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 4px);
+		-webkit-animation: scan 1.2s linear infinite; animation: scan 1.2s linear infinite; }
+	@-webkit-keyframes scan { from { -webkit-transform: translateY(0); } to { -webkit-transform: translateY(4px); } }
+	@keyframes scan { from { transform: translateY(0); } to { transform: translateY(4px); } }
+
+	/* светлая полоса */
+	#sweep { position: absolute; top: -50%; bottom: -50%; width: 30vw; left: -40vw;
+		background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0) 100%);
+		-webkit-transform: rotate(15deg); transform: rotate(15deg);
+		-webkit-animation: sweep 6s ease-in-out infinite; animation: sweep 6s ease-in-out infinite; }
+	@-webkit-keyframes sweep { 0% { left: -40vw; } 70%,100% { left: 120vw; } }
+	@keyframes sweep { 0% { left: -40vw; } 70%,100% { left: 120vw; } }
+
+	#snow { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+
+	/* затемнение по краям + лёгкий иней снизу */
+	#shade { position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+		background: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.75) 100%); }
+	#frost { position: absolute; left: 0; right: 0; bottom: 0; height: 22vh;
+		background: linear-gradient(0deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 100%); }
+
+	#wrap { position: absolute; left: 0; right: 0; top: 46%; -webkit-transform: translateY(-50%); transform: translateY(-50%); }
+	#title { font-size: 8vh; font-weight: 300; letter-spacing: 2vh; padding-left: 2vh; color: #f2f2f2;
+		text-shadow: 0 0 3vh rgba(0,0,0,0.6), 0 0 5vh rgba(255,255,255,0.08);
+		-webkit-animation: breathe 3.5s ease-in-out infinite; animation: breathe 3.5s ease-in-out infinite; }
+	@-webkit-keyframes breathe { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+	@keyframes breathe { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+</style>
+</head>
+<body>
+	<div class="blob" id="b1"></div>
+	<div class="blob" id="b2"></div>
+	<div class="blob" id="b3"></div>
+	<div id="lines"></div>
+	<div id="sweep"></div>
+	<canvas id="snow"></canvas>
+	<div id="frost"></div>
+	<div id="shade"></div>
+	<div id="wrap">
+		<div id="title">Z-ANUS</div>
+	</div>
+<script>
+// GMod вызывает эти функции во время загрузки - нам они не нужны, но должны существовать
+window.GameDetails = function () {};
+window.SetFilesTotal = function () {};
+window.SetFilesNeeded = function () {};
+window.DownloadingFile = function () {};
+window.SetStatusChanged = function () {};
+
+(function () {
+	"use strict";
+	// ------------------------------------------------------------ квадратный снег
+	var cv = document.getElementById("snow");
+	var ctx = cv.getContext && cv.getContext("2d");
+	if (!ctx) return;
+	var W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
+	var flakes = [];
+
+	function rand(a, b) { return a + Math.random() * (b - a); }
+
+	// слои: 0 - дальние (мелкие, тусклые, медленные), 1 - средние, 2 - ближние (крупные, вращаются)
+	var L = [
+		{ size: [2, 3], spd: 16, sway: 8,  a: [0.20, 0.40], spin: 0 },
+		{ size: [3.5, 5.5], spd: 28, sway: 14, a: [0.40, 0.65], spin: 0.8 },
+		{ size: [6.5, 11],  spd: 46, sway: 24, a: [0.65, 0.95], spin: 1.4 }
+	];
+
+	function makeFlake(layer, anyY) {
+		var c = L[layer], f = { layer: layer };
+		f.s = rand(c.size[0], c.size[1]) * DPR;
+		f.vy = rand(c.spd * 0.75, c.spd * 1.25) * DPR;
+		f.sway = rand(c.sway * 0.4, c.sway) * DPR;
+		f.freq = rand(0.25, 0.7);
+		f.phase = rand(0, Math.PI * 2);
+		f.x = rand(-40, W + 40);
+		f.y = anyY ? rand(-40, H) : rand(-60, -10);
+		f.a = rand(c.a[0], c.a[1]);
+		f.rot = rand(0, Math.PI / 2);
+		f.vr = rand(-c.spin, c.spin);
+		// часть ближних - пустые квадратики (контур)
+		f.hollow = layer === 2 && Math.random() < 0.3;
+		return f;
+	}
+
+	function populate() {
+		flakes = [];
+		var area = (W * H) / (DPR * DPR) / (1920 * 1080);
+		var counts = [120, 70, 28];
+		for (var l = 0; l < 3; l++) {
+			var n = Math.max(6, Math.round(counts[l] * Math.max(area, 0.4)));
+			for (var i = 0; i < n; i++) flakes.push(makeFlake(l, true));
+		}
+	}
+
+	function resize() {
+		W = Math.floor(window.innerWidth * DPR);
+		H = Math.floor(window.innerHeight * DPR);
+		cv.width = W; cv.height = H;
+		populate();
+	}
+
+	var wind = 0, windTarget = 0, nextGust = 0;
+	var raf = window.requestAnimationFrame || window.webkitRequestAnimationFrame ||
+		function (cb) { return setTimeout(function () { cb(Date.now()); }, 1000 / 60); };
+	var last = 0, t = 0;
+
+	function frame(now) {
+		now = now || Date.now();
+		var dt = last ? Math.min((now - last) / 1000, 0.05) : 0.016;
+		last = now; t += dt;
+
+		if (t > nextGust) {
+			windTarget = Math.random() < 0.3 ? rand(-55, 55) : rand(-16, 16);
+			nextGust = t + rand(3, 8);
+		}
+		wind += (windTarget - wind) * Math.min(dt * 0.6, 1);
+
+		ctx.clearRect(0, 0, W, H);
+		ctx.fillStyle = "#ffffff";
+		ctx.strokeStyle = "#ffffff";
+		for (var i = 0; i < flakes.length; i++) {
+			var f = flakes[i];
+			var depth = [0.35, 0.65, 1][f.layer];
+			f.y += f.vy * dt;
+			f.x += wind * depth * DPR * dt;
+			var sx = f.x + Math.sin(t * f.freq + f.phase) * f.sway;
+			if (f.y > H + 20 || sx < -60 || sx > W + 60) {
+				var nf = makeFlake(f.layer, false);
+				if (sx < -60) nf.x = W + 30; else if (sx > W + 60) nf.x = -30;
+				flakes[i] = nf;
+				continue;
+			}
+			ctx.globalAlpha = f.a;
+			var h = f.s / 2;
+			if (f.vr !== 0) {
+				f.rot += f.vr * dt;
+				ctx.save();
+				ctx.translate(sx, f.y);
+				ctx.rotate(f.rot);
+				if (f.hollow) { ctx.lineWidth = Math.max(1, f.s * 0.18); ctx.strokeRect(-h, -h, f.s, f.s); }
+				else ctx.fillRect(-h, -h, f.s, f.s);
+				ctx.restore();
+			} else {
+				// мелкие - ровные квадратики по пикселям, без размытия
+				ctx.fillRect(Math.round(sx - h), Math.round(f.y - h), Math.max(1, Math.round(f.s)), Math.max(1, Math.round(f.s)));
+			}
+		}
+		ctx.globalAlpha = 1;
+		raf(frame);
+	}
+
+	resize();
+	window.addEventListener("resize", resize);
+	raf(frame);
+})();
+</script>
+</body>
+</html>
